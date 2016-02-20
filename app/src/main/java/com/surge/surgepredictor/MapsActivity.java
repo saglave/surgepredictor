@@ -2,9 +2,14 @@ package com.surge.surgepredictor;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -47,6 +52,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        String bestProvider = locationManager.getBestProvider(criteria, true);
+        Location location = locationManager.getLastKnownLocation(bestProvider);
+        if (location != null) {
+            onLocationChanged(location);
+        }
+//        locationManager.requestLocationUpdates(bestProvider, 20000, 0, this);
     }
+
+    public void onLocationChanged(Location location) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        LatLng latLng = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(latLng));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+//        locationTv.setText("Latitude:" + latitude + ", Longitude:" + longitude);
+        Log.d("MAPS", "Latitude:" + latitude + ", Longitude:" + longitude);
+    }
+
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+    }
+
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+    }
+
 }
