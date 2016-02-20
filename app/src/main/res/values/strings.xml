@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">SurgePredictor</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">Uber Surge Predictor</string>
     <string name="google_app_id">362794680603</string>
 </resources>
