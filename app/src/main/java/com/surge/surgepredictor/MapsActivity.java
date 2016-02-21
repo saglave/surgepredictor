@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -55,7 +56,7 @@ import java.util.Date;
 public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
-    String urlFixed = "http://8056b731.ngrok.io/surge/uber-surge/", url = "http://8056b731.ngrok.io/surge/uber-surge/";
+    String urlFixed = "http://8234655d.ngrok.io/surge/uber-surge/", url = "http://8234655d.ngrok.io/surge/uber-surge/";
     URL url1;
     HttpURLConnection urlConnection;
     static String TAG = "tag";
@@ -70,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     static String time, date, setTime;
     String result = null;
     static String resultMessage;
+    static LatLng latLng = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +122,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         setTime = time;
         button.setText(time);
         int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
+        int month = c.get(Calendar.MONTH) + 1;
         int day = c.get(Calendar.DAY_OF_MONTH);
         String sday = String.valueOf(day), smonth = String.valueOf(month), syear = String.valueOf(year);
         if(day<10)
@@ -174,18 +176,18 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = locationManager.getLastKnownLocation("gps");
         if(location!=null) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            latLng = new LatLng(location.getLatitude(), location.getLongitude());
             mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Point A"));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         }
 
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
+            public void onMapLongClick(LatLng latLng1) {
                 if (COUNT == 3) {
                     COUNT = 1;
                     mMap.clear();
-
+                    latLng = latLng1;
                     //MarkerTwo.remove();
                     //MarkerOne.remove();
                 }
@@ -195,6 +197,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
                             .title("Point A")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                     COUNT++;
+
 
                 } else if (COUNT == 2) {
                     COUNT++;
@@ -229,7 +232,11 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 
         time = minutes[0]+":"+minutes[1];
         Log.d(TAG, time);
-        params = "?time="+time.replace(":","%3A")+"&day="+date.replace("/","%2F");
+        double latitude = latLng.latitude;
+        double longitude = latLng.longitude;
+        String lat = String.valueOf(latitude);
+        String longi = String.valueOf(longitude);
+        params = "?time="+time.replace(":","%3A")+"&day="+date.replace("/","%2F")+"&lat="+lat+"&long="+longi;
         url = urlFixed+params;
         Log.d(TAG, url);
         NetworkCall newReq = new NetworkCall();
@@ -244,7 +251,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         mMap.setMyLocationEnabled(true);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(currentLatitude, currentLongitude)).title("Current Location"));
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title("I am here!");
@@ -346,7 +352,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 //                Date date = new Date();
 //                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
-                resultMessage =  "The expected surge at "+setTime+" is "+values[3]+". You can book a cab at "+ resultTime +" when the expected surge would be " + minimumSurge + "x. Would you like me to notify you 10 minutes in advance?";
+                resultMessage =  "The current surge is "+values[7] +"x. The expected surge at "+setTime+" is "+values[3]+"x. You can book a cab at "+ resultTime +" when the expected surge would be " + minimumSurge + "x. Would you like me to notify you 10 minutes in advance?";
                 Log.d("Result",resultMessage);
 
             }
@@ -470,28 +476,29 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
             button.setText(time);
         }
     }
-    public static class FragmentDate extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+    public static class FragmentDate extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Calendar c = Calendar.getInstance();
             int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
+            int month = c.get(Calendar.MONTH) + 1;
             int day = c.get(Calendar.DAY_OF_MONTH);
-            return new DatePickerDialog(getActivity(),this,year,month,day);
+            return new DatePickerDialog(getActivity(), this, year, month - 1, day);
         }
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            String sday = String.valueOf(dayOfMonth), smonth = String.valueOf(monthOfYear), syear = String.valueOf(year);
-            if(dayOfMonth<10)
+            String sday = String.valueOf(dayOfMonth), smonth = String.valueOf(monthOfYear + 1), syear = String.valueOf(year);
+            if (dayOfMonth < 10)
                 sday = "0" + sday;
-            if(monthOfYear<10)
+            if (monthOfYear < 10)
                 smonth = "0" + smonth;
-            date = sday+"/"+smonth+"/"+syear;
+            date = sday + "/" + smonth + "/" + syear;
             button2.setText(date);
         }
     }
+
     public static class SomeDialog extends DialogFragment {
 
         @Override
@@ -508,7 +515,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
                     .setPositiveButton("Yeah!", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // do something
                         }
                     })
                     .create();
