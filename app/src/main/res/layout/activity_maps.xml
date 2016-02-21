@@ -16,10 +16,11 @@
         android:text="Set Time"
         android:id="@+id/timepick"
         android:onClick="TimeSelect"
+        android:elevation="5dp"
+        android:layout_marginBottom="40dp"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="50dp"
-        android:layout_marginBottom="50dp" />
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -27,8 +28,20 @@
         android:text="Set Date"
         android:id="@+id/datepick"
         android:onClick="DaySelect"
+        android:layout_centerInParent="true"
+        android:elevation="5dp"
         android:layout_alignTop="@+id/timepick"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="54dp" />
+        android:layout_toEndOf="@+id/timepick" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Predict Surge!"
+        android:id="@+id/button"
+        android:onClick="predict"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/datepick"
+        android:layout_toEndOf="@+id/datepick" />
 
 </RelativeLayout>
